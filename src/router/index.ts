@@ -1,11 +1,31 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import Home from "@/views/Home.vue";
 import Todo from "@/views/Todo.vue";
+import Login from "@/views/Login.vue";
+import Register from "@/views/Register.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    name: "Todo",
-    component: Todo,
+    name: "Home",
+    component: Home,
+    children: [
+      {
+        path: "/todos",
+        name: "Todo",
+        component: Todo,
+      },
+      {
+        path: "/login",
+        name: "Login",
+        component: Login,
+      },
+      {
+        path: "/register",
+        name: "Register",
+        component: Register,
+      },
+    ]
   },
 ];
 

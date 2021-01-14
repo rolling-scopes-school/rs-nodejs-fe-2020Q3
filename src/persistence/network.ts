@@ -1,14 +1,58 @@
 import axios from 'axios';
 import { ItemType } from '@/types';
 
-const route = 'todos'
-const baseURL = (process.env.VUE_APP_BASE_URL ?? `http://localhost:3000`).replace(/\/$/, '') + `/${route}`;
+const baseURL = (process.env.VUE_APP_BASE_URL ?? `http://localhost:3000`).replace(/\/$/, '') + `/`;
 
-export default {
+interface AuthLoginResponse {
+  statusCode: number;
+  token?: string;
+  reason?: string;
+}
+
+export const auth = {
+  token: undefined,
+
+  async login (data: { username: string; password: string }): Promise<AuthLoginResponse> {
+    const response = await axios({
+      baseURL,
+      method: 'post',
+      url: '/auth/login',
+      data,
+    });
+
+    return response.data;
+  },
+
+  async register (data: { username: string; password: string; email: string; }): Promise<AuthLoginResponse> {
+    const response = await axios({
+      baseURL,
+      method: 'post',
+      url: '/auth/register',
+      data,
+    });
+
+    return response.data;
+  },
+
+  async test (): Promise<{ statusCode: number }> {
+    const headers = { Authorization: auth.token }
+
+    const response = await axios({
+      baseURL,
+      method: 'post',
+      url: '/auth/test',
+      headers
+    });
+
+    return response.data;
+  }
+};
+
+export const todos = {
   async get (): Promise<ItemType[]> {
     const response = await axios({
       baseURL,
-      url: '/'
+      url: '/todos'
     });
 
     return response.data;
@@ -19,7 +63,7 @@ export default {
       baseURL,
       method: 'post',
       data,
-      url: '/'
+      url: '/todos'
     });
 
     return response.data;
@@ -30,7 +74,7 @@ export default {
       baseURL,
       method: 'put',
       data,
-      url: `/${data.id}`
+      url: `/todos/${data.id}`
     });
 
     return response.data;
@@ -40,7 +84,7 @@ export default {
     const response = await axios({
       baseURL,
       method: 'delete',
-      url: `/${data.id}`
+      url: `/todos/${data.id}`
     });
 
     return response.data;

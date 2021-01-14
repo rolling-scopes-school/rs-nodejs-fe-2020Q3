@@ -16,7 +16,7 @@ import TodoInput from "@/components/TodoInput.vue";
 import TodoList from "@/components/TodoList.vue";
 import UnderBar from "@/components/UnderBar.vue";
 import { reactive, ref, unref } from "vue";
-import persistence from '../persistence/network'
+import { todos as persistence } from '../persistence/network'
 
 export default {
   components: { TodoInput, TodoList, UnderBar },
