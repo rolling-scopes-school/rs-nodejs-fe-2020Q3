@@ -1,12 +1,14 @@
 <template>
   <div>Login Page</div>
   <div>
-    <span v-show="errorData.errorText">{{ errorData.errorText }}</span> <br/>
-    <input type="text" v-model="loginData.username" placeholder="Username"/> <br/>
-    <input type="text" v-model="loginData.password" placeholder="Password"/> <br/>
-    <button @click="click" style="border: 1px solid gray;">Log in</button> <br/>
-    <button @click="test" style="border: 1px solid gray;">Test session</button> <span>{{ testData.result }}</span>
-    <RouterLink to="/login"/>
+    <span v-show="errorData.errorText">{{ errorData.errorText }}</span> <br />
+    <input type="text" v-model="loginData.username" placeholder="Username" /> <br />
+    <input type="text" v-model="loginData.password" placeholder="Password" /> <br />
+    <button @click="click" style="border: 1px solid gray;">Log in</button>
+    <br />
+    <button @click="test" style="border: 1px solid gray;">Test session</button>
+    <span>{{ testData.result }}</span>
+    <RouterLink to="/login" />
   </div>
 </template>
 
@@ -24,26 +26,22 @@ export default {
     const click = async () => {
       const authData = await auth.login(loginData);
 
-      if (authData.statusCode === 200) {
-        auth.token = authData.token;
-      } else {
-        errorData.errorText = authData.reason;
-      }
-    }
+      errorData.errorText = authData.statusCode === 200 ? '' : authData.reason;
+    };
 
     const test = async () => {
       const result = await auth.test();
 
       testData.result = result.statusCode === 200 ? 'ok' : 'fail';
-    }
+    };
 
     return {
       click,
       test,
       errorData,
       loginData,
-      testData
-    }
+      testData,
+    };
   },
 };
 </script>

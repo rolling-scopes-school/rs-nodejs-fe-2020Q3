@@ -1,11 +1,11 @@
 import { ItemType } from '@/types';
 
-const todos = 'todos';
+const todosNs = 'todos';
 
-const parseList = (string: string): ItemType[] => {
+const { parse } = JSON;
+
+const assertList = (value: unknown): ItemType[] => {
   try {
-    const value = JSON.parse(string);
-
     if (!Array.isArray(value)) {
       // noinspection ExceptionCaughtLocallyJS
       throw new TypeError('"todos" property contains non-array value');
@@ -21,35 +21,44 @@ const parseList = (string: string): ItemType[] => {
   }
 
   return [];
-}
+};
 
-const getContents = (): ItemType[] => {
-  const todoListString = localStorage.getItem(todos);
+const getContents = <T> (namespace: string): T => {
+  const value = localStorage.getItem(namespace);
 
-  return parseList(todoListString);
-}
+  return value ? parse(value) : undefined;
+};
 
-const setContents = (items: ItemType[]): void => {
-  localStorage.setItem(todos, JSON.stringify(items));
-}
+const setContents = <T> (namespace: string, value: T): void => {
+  if (typeof value === 'undefined') {
+    localStorage.removeItem(namespace);
+  } else {
+    localStorage.setItem(namespace, JSON.stringify(value));
+  }
+};
 
-export default {
+export {
+  getContents,
+  setContents,
+};
+
+export const todos = {
   async get (): Promise<ItemType[]> {
-    return getContents();
+    return assertList(getContents(todosNs));
   },
 
   async create (data: ItemType): Promise<ItemType> {
-    const list = getContents();
+    const list = assertList(getContents(todosNs));
 
     list.push(data);
 
-    setContents(list);
+    setContents(todosNs, list);
 
     return data;
   },
 
   async save (data: ItemType): Promise<ItemType> {
-    const list = getContents();
+    const list = assertList(getContents(todosNs));
 
     const index = list.findIndex((v) => v.id === data.id);
 
@@ -59,13 +68,13 @@ export default {
 
     list[index] = data;
 
-    setContents(list);
+    setContents(todosNs, list);
 
     return data;
   },
 
   async remove (data: ItemType): Promise<void> {
-    const list = getContents();
+    const list = assertList(getContents(todosNs));
 
     const index = list.findIndex((v) => v.id === data.id);
 
@@ -75,6 +84,6 @@ export default {
 
     list.splice(index, 1);
 
-    setContents(list);
-  }
-}
+    setContents(todosNs, list);
+  },
+};

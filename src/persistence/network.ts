@@ -1,7 +1,14 @@
-import axios from 'axios';
+import axiosLib from 'axios';
 import { ItemType } from '@/types';
+import { getContents, setContents } from '@/persistence/localStorage';
 
 const baseURL = (process.env.VUE_APP_BASE_URL ?? `http://localhost:3000`).replace(/\/$/, '') + `/`;
+
+const axios = axiosLib.create({
+  validateStatus: function (status) {
+    return status >= 200 && status < 600;
+  },
+});
 
 interface AuthLoginResponse {
   statusCode: number;
@@ -10,7 +17,18 @@ interface AuthLoginResponse {
 }
 
 export const auth = {
-  token: undefined,
+  token: getContents<string>('token'),
+
+  setToken (value?: string) {
+    auth.token = value;
+    setContents<string>('token', value);
+  },
+
+  getAuthHeaders () {
+    return auth.token
+      ? { Authorization: auth.token }
+      : {};
+  },
 
   async login (data: { username: string; password: string }): Promise<AuthLoginResponse> {
     const response = await axios({
@@ -19,6 +37,8 @@ export const auth = {
       url: '/auth/login',
       data,
     });
+
+    auth.setToken(response.data.token);
 
     return response.data;
   },
@@ -31,62 +51,76 @@ export const auth = {
       data,
     });
 
+    auth.setToken(response.data.token);
+
     return response.data;
   },
 
   async test (): Promise<{ statusCode: number }> {
-    const headers = { Authorization: auth.token }
+    const headers = auth.getAuthHeaders();
 
     const response = await axios({
       baseURL,
       method: 'post',
       url: '/auth/test',
-      headers
+      headers,
     });
 
     return response.data;
-  }
+  },
 };
 
 export const todos = {
   async get (): Promise<ItemType[]> {
+    const headers = auth.getAuthHeaders();
+
     const response = await axios({
       baseURL,
-      url: '/todos'
+      url: '/todos',
+      headers,
     });
 
     return response.data;
   },
 
   async create (data: ItemType): Promise<ItemType> {
+    const headers = auth.getAuthHeaders();
+
     const response = await axios({
       baseURL,
       method: 'post',
       data,
-      url: '/todos'
+      url: '/todos',
+      headers,
     });
 
     return response.data;
   },
 
   async save (data: ItemType): Promise<ItemType> {
+    const headers = auth.getAuthHeaders();
+
     const response = await axios({
       baseURL,
       method: 'put',
       data,
-      url: `/todos/${data.id}`
+      url: `/todos/${data.id}`,
+      headers,
     });
 
     return response.data;
   },
 
   async remove (data: ItemType): Promise<void> {
+    const headers = auth.getAuthHeaders();
+
     const response = await axios({
       baseURL,
       method: 'delete',
-      url: `/todos/${data.id}`
+      url: `/todos/${data.id}`,
+      headers,
     });
 
     return response.data;
-  }
-}
+  },
+};
