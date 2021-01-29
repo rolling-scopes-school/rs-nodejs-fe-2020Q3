@@ -1,8 +1,7 @@
 import axiosLib from 'axios';
 import { ItemType } from '@/types';
 import { getContents, setContents } from '@/persistence/localStorage';
-
-const baseURL = (process.env.VUE_APP_BASE_URL ?? `http://localhost:3000`).replace(/\/$/, '') + `/`;
+import { baseURL } from '@/constants';
 
 const axios = axiosLib.create({
   validateStatus: function (status) {
